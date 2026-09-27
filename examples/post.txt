@@ -1,0 +1,5 @@
+Código bom começa com decisões claras.
+
+Antes de pedir para uma IA implementar uma funcionalidade, descreva o problema e os critérios de aceitação. Exemplos concretos ajudam a transformar uma ideia vaga em um comportamento verificável.
+
+Depois, revise o resultado. Testes mostram se o código faz o que esperamos; a revisão também avalia se a solução continua fácil de entender e manter.
