@@ -1,8 +1,10 @@
 # Instagram Carrossel
 
-Recebe um `.txt`, chama o **Codex CLI para selecionar as ideias principais** e renderiza um carrossel de PNGs **1080 × 1350**, um reel MP4 H.264 **1080 × 1920 / 30 fps** e sua capa.
+O usuário envia **texto ou JSON por esta conversa**. O agente organiza os posts, prepara as entradas do gerador e entrega carrosséis, reels, capas e legendas. As regras desse atendimento estão em [AGENTS.md](AGENTS.md).
 
-Adaptado do [gist de Paulo Silveira (peas)](https://gist.github.com/peas/2f224fbb9674734315079eb70dae8f60): usa o motor Remotion `Ensaio`, o estilo editorial e o princípio de recortar trechos do autor. A etapa editorial agora acontece automaticamente via Codex, antes da renderização. Projeto independente para gerar mídia local.
+Internamente, o gerador de terminal recebe um `.txt` por post, chama o **Codex CLI para selecionar as ideias principais** e renderiza um carrossel de PNGs **1080 × 1350**, um reel MP4 H.264 **1080 × 1920 / 30 fps** e sua capa.
+
+Adaptado do [gist de Paulo Silveira (peas)](https://gist.github.com/peas/2f224fbb9674734315079eb70dae8f60): usa o motor Remotion `Ensaio`, a base visual original, com regras editoriais próprias para adaptar o texto do autor com fidelidade. A etapa editorial agora acontece automaticamente via Codex, antes da renderização. Projeto independente para gerar mídia local.
 
 ## Instalação
 
@@ -19,9 +21,15 @@ A etapa editorial e a revisão visual usam o Codex autenticado. As fotos devem s
 
 O setup baixa o Chromium para Playwright e Remotion. Se ele estiver ausente, o gerador tenta usar o Chrome instalado nos caminhos comuns de macOS/Linux. Também aceita `--browser "/caminho/do/chrome"`. Em Linux, se faltarem bibliotecas, execute `npx playwright install --with-deps chromium`.
 
-## Gerar a partir de um post
+## Entrada pela conversa
 
-A entrada é **um arquivo `.txt` com o texto de um único post**. A lista de posts exportada em JSON não é uma entrada aceita por este comando.
+Envie o texto de um post ou um JSON com vários textos, colado ou anexado. Por padrão, o agente prepara os dois formatos para cada post; você pode indicar um formato ou um subconjunto do lote. Não é necessário converter o conteúdo em arquivos `.txt`.
+
+O agente inspeciona os campos reais do JSON, preserva a ordem e os IDs e mantém os comentários associados aos respectivos posts. Campos ambíguos precisam ser esclarecidos; não há um esquema de JSON obrigatório para o atendimento pela conversa. Para lotes, a entrega inclui um índice com os arquivos e as pendências de cada post. A geração local não publica no Instagram.
+
+## Gerar pelo terminal
+
+Esta seção documenta a ferramenta usada pelo agente e também permite execução manual. A CLI aceita **um arquivo `.txt` com o texto de um único post**. Ela não importa diretamente JSON: o agente prepara um `.txt` por post e mantém comentários e metadados separados.
 
 1. Salve o texto do post em `meu-post.txt`, em UTF-8, com os parágrafos habituais. Por exemplo:
 
@@ -39,7 +47,7 @@ A entrada é **um arquivo `.txt` com o texto de um único post**. A lista de pos
    npm run generate -- /caminho/meu-post.txt --image foto.jpg --image-url https://unsplash.com/photos/ID-DA-FOTO
    ```
 
-O comando envia o post ao Codex, seleciona os trechos principais e gera o carrossel e o reel na mesma execução. As imagens mostram o conteúdo selecionado, sem “Ensaio”, “Continue a leitura”, nome do autor ou contador de página. Isso também vale para a capa do reel.
+O comando envia o post ao Codex, adapta as ideias principais e gera o carrossel e o reel na mesma execução. As imagens mostram o conteúdo selecionado, sem “Ensaio”, “Continue a leitura”, assinatura do autor do perfil ou contador de página. Atribuições a pessoas citadas no post podem aparecer na capa. Isso também vale para a capa do reel.
 
 Para testar com o exemplo incluído ou escolher a pasta de saída:
 
@@ -68,6 +76,7 @@ Opções:
 
 - `--image foto.jpg`: foto real gratuita baixada do Unsplash (JPEG ou PNG).
 - `--image-url https://unsplash.com/photos/...`: página da foto selecionada para crédito; não use a URL da busca ou do arquivo de imagem.
+- `--music nome.mp3`: escolhe uma faixa da pasta `music/` do projeto. Sem essa opção, o gerador escolhe uma automaticamente.
 - `--model nome`: escolhe o modelo usado por `codex exec`; sem isso, usa a configuração do Codex.
 - `--codex /caminho/codex`: executável alternativo; por padrão usa a versão local instalada por `npm ci`, inclusive ao chamar `node generate.mjs` de outro diretório.
 - `--plan-only`: chama o Codex e salva apenas o roteiro, sem abrir navegador ou renderizar mídia.
@@ -79,8 +88,9 @@ Sem `--out`, cada execução cria `out/<nome>-<timestamp>/`.
 ```text
 out/<nome>-<timestamp>/
   carrossel/01.png ...       # capa e slides; só os arquivos são numerados
-  reel.mp4                  # texto animado, sem áudio
+  reel.mp4                  # texto animado com música de fundo
   capa-reel.png             # capa própria do reel
+  musica.json               # faixa usada, volume e fades
   carrossel.html            # prévia com fontes embutidas
   fotos/editorial.jpg       # foto aprovada (ou .png)
   avaliacoes-fotos.json    # aprovação, notas e motivos
@@ -92,13 +102,17 @@ out/<nome>-<timestamp>/
 
 ## Seleção editorial com IA
 
-O prompt em `src/editorial-prompt.txt` pede ao Codex dois roteiros independentes: carrossel que entrega a conclusão já na capa e desenvolve os argumentos nas páginas seguintes; reel ainda mais curto. Exemplos secundários e repetições são omitidos. O texto original deixa de ser paginado integralmente.
+O prompt em `src/editorial-prompt.txt` pede dois roteiros independentes: um carrossel que preserva os pontos centrais e seus detalhes úteis, e um reel mais curto. A IA pode **reescrever, condensar e criar chamadas fiéis ao original**, mantendo fatos, termos técnicos, atribuições e ressalvas. Não exige trechos literais nem deve inventar informações.
 
-Como no playbook original, a IA **seleciona e reordena trechos literais**, sem inventar ou parafrasear o autor. O programa verifica se cada trecho aparece no post, ignorando diferenças de espaços e quebras de linha. Essa validação impede frases novas, mas a revisão humana ainda é importante para conferir contexto e seleção editorial.
+A capa pode apresentar uma chamada específica para o conteúdo ou resumir a ideia principal. Pode citar a pessoa, o cargo ou a empresa do original quando isso ajudar a contextualizar os conselhos. Por exemplo: “Como ser um dev produtivo, de acordo com Dax, um dos criadores do OpenCode”. Não há obrigação de entregar a conclusão na primeira imagem; chamadas genéricas e clickbait devem ser evitados.
 
-A capa deve ser compreensível sozinha, com uma conclusão forte e acionável quando o original permitir. Pode combinar uma frase em fonte maior e uma explicação menor. As páginas seguintes também permitem essa hierarquia, aprofundando a ideia sem repetir a capa.
+Cada slide interno desenvolve uma ideia. Quando ela for curta, basta uma frase. Quando houver detalhes, a frase principal fica em negrito e a explicação em peso regular abaixo. Prefira mais páginas a reunir várias ideias numa imagem. Não corte itens centrais de uma lista para atingir uma quantidade fixa de slides e não invente explicações para preencher espaço. O tom é profissional, técnico e direto.
 
-Limites: frase da capa com até 100 caracteres e complemento opcional de até 160; de 1 a 7 páginas com frase principal de até 100 caracteres e explicação opcional de até 220; de 1 a 8 cenas com até 140 caracteres cada. Textos longos podem ser enviados sem a antiga restrição de quantidade de páginas da entrada. O reel mira 30–40 segundos e é validado para no máximo 45; posts curtos podem gerar vídeos menores.
+Os três exemplos em `examples/editorial.json` acompanham o prompt como referências de estilo: conselhos de Dax, competências na entrevista de Elizabeth e recomendações de FinOps da Coinbase. Seus fatos não devem ser transferidos para outros posts.
+
+Limites: capa de até 100 caracteres e complemento opcional de até 160; de 1 a 19 páginas internas com frase principal de até 140 caracteres e explicação opcional de até 320. São limites do gerador, não metas de preenchimento. Com explicação longa, prefira um título curto; distribua o desenvolvimento em mais páginas quando necessário. O reel permite de 1 a 8 cenas de até 140 caracteres, mira 30–40 segundos e é validado para no máximo 45; posts curtos podem gerar vídeos menores.
+
+A validação automática confere estrutura, tamanho e duração. Ela **não comprova fidelidade semântica**: compare o roteiro com o original e revise fatos, atribuições, contexto e cobertura das ideias antes de entregar as mídias. A renderização também verifica transbordamento, e a revisão visual continua obrigatória.
 
 O Codex roda em uma pasta temporária, em modo `read-only`, com resposta estruturada por JSON Schema e prompt via stdin. A integração segue o [modo não interativo oficial](https://learn.chatgpt.com/docs/non-interactive-mode). Cada chamada tem limite de três minutos. Se o roteiro vier inválido, pede uma correção uma vez. Falhas de login, execução ou validação encerram o comando com código 1: não há fallback silencioso para o texto inteiro. Os arquivos já produzidos ficam no destino para diagnóstico.
 
@@ -113,15 +127,23 @@ A busca e o download no site são manuais ou conduzidos pelo agente no navegador
 
 A foto aparece só na capa do carrossel e em uma cena do reel. As páginas internas continuam com texto e cores variadas. `creditos-fotos.txt` contém a última linha da legenda: `Crédito da imagem: <link da página da foto>`.
 
-Arquivos antigos não são alterados. O comando gera mídia local e não publica no Instagram. O reel continua sem áudio.
+Arquivos antigos não são alterados. O comando gera mídia local e não publica no Instagram. Todo reel recebe uma música de fundo da pasta `music/`.
+
+## Música de fundo
+
+Coloque as trilhas em `music/`, na raiz do projeto (MP3, WAV, M4A, AAC, FLAC ou OGG). A CLI escolhe automaticamente uma delas em cada geração; para indicar uma faixa, passe `--music nome-do-arquivo.mp3`. A seleção usa a pasta do projeto mesmo quando o comando é chamado de outro diretório.
+
+A música acompanha todo o reel, com volume de fundo de 18%, entrada suave de um segundo e saída de dois segundos. Faixas curtas se repetem. `musica.json` registra a escolha. Se não houver música compatível, a geração para antes de chamar a etapa editorial; `--plan-only` continua funcionando sem áudio.
 
 ## Legendas e referências na publicação
 
-Ao publicar carrosséis ou reels, use o corpo completo do post como legenda e **inclua hashtags relacionadas ao conteúdo no fim**. Preserve hashtags relevantes já existentes, evite duplicatas e acrescente hashtags específicas quando o original não tiver nenhuma. Se a legenda exceder o limite do Instagram, faça um resumo fiel que caiba junto com as hashtags. As hashtags ficam na legenda, não nas imagens ou cenas.
+O agente prepara as legendas à parte, usando o corpo completo do post ou um resumo fiel quando necessário para caber no limite vigente do Instagram. A ordem final é: corpo ou resumo, parágrafo de hashtags pertinentes, linha `Fonte original: <link fornecido>` quando houver e linha `Crédito da imagem: <link da página da foto no Unsplash>`. A contagem inclui todo esse conteúdo, espaços e quebras de linha. Preserve hashtags relevantes do original e remova duplicatas. Não coloque hashtags nas imagens ou cenas.
 
-Essas são instruções para a etapa de publicação, registradas também em `AGENTS.md`. O comando de geração continua produzindo mídia local, sem publicar ou preparar legendas automaticamente.
+Se o texto ou o material fornecido com o post incluir o link da fonte original, inclua-o nas duas legendas, imediatamente acima do crédito da imagem, mesmo quando também houver um comentário separado com esse link. Use somente os links fornecidos e associados ao post; não invente uma fonte quando ela estiver ausente.
 
-O JSON usado no lote atual não contém o comentário com o link de referência. Um novo export incluirá esse comentário; a importação deverá ser adaptada depois de conferir o nome e a estrutura reais do campo, mantendo sua associação ao ID do post. Até lá, não invente links nem considere que “link nos comentários” significa que a referência já foi publicada. A entrada do comando continua sendo um `.txt` por post.
+Comentários de referência, quando fornecidos, são preservados separadamente e associados ao ID do post após conferir a estrutura real do JSON. Não invente links nem considere que “link nos comentários” significa que a referência já foi publicada. Se o link não tiver sido fornecido, registre a pendência antes da publicação.
+
+Essas tarefas fazem parte do atendimento pelo agente descrito em [AGENTS.md](AGENTS.md). A CLI gera mídia local e o arquivo de crédito; ela não importa JSON, prepara legendas ou publica automaticamente.
 
 ## Verificação
 
@@ -135,7 +157,7 @@ Os testes automatizados usam um executável falso na fronteira com o Codex para 
 
 ### Cores e luminosidade
 
-As fotos mantêm suas cores, com leve ajuste de luminosidade. Painéis claros garantem a leitura sem escurecer a imagem inteira. Os slides de texto alternam seis paletas (pêssego, menta, azul, rosa, lavanda e lima), com texto escuro e cores estáveis ao renderizar o mesmo roteiro novamente. O reel segue a mesma direção visual.
+As fotos mantêm suas cores, com leve ajuste de luminosidade. Os fundos e painéis alternam carvão, azul-marinho e verde-escuro, com texto claro e cores estáveis ao renderizar o mesmo roteiro novamente. As capas usam Anton em caixa alta, uma aproximação da fonte condensada da referência StartSe (a fonte original não foi confirmada). Os slides internos usam Inter, com frase principal em negrito e explicação menor em peso regular, separadas por espaço generoso. O reel compartilha as cores sóbrias e mantém sua tipografia de cenas.
 
 ### Revisão visual obrigatória
 
@@ -143,7 +165,7 @@ Cada imagem é anexada ao Codex junto com o texto completo do post. A IA inspeci
 
 ### Crédito na legenda
 
-Depois das hashtags, termine com `Crédito da imagem: <link da página da foto no Unsplash>`. Essa linha substitui o aviso anterior de imagem gerada por IA. Conte o crédito no limite de caracteres. Para fotos reais sem geração ou alteração por IA, não ative o rótulo de IA só porque o Codex selecionou os trechos do texto. Se outro elemento da publicação for sintético, avalie-o separadamente.
+Depois das hashtags, inclua `Fonte original: <link fornecido>` quando houver e termine com `Crédito da imagem: <link da página da foto no Unsplash>`. Essa linha substitui o aviso anterior de imagem gerada por IA. Conte também o link da fonte e o crédito no limite de caracteres. Para fotos reais sem geração ou alteração por IA, não ative o rótulo de IA só porque o Codex selecionou os trechos do texto. Se outro elemento da publicação for sintético, avalie-o separadamente.
 
 ## Materiais já preparados
 

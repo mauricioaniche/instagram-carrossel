@@ -1,9 +1,10 @@
 // Adaptado de https://gist.github.com/peas/2f224fbb9674734315079eb70dae8f60
 // Reusable "essay" Reel (1080x1920, 30 fps): archival photos with slow zoom, serif text revealed word by word.
-// Each Reel is a list of scenes (see humano-fora-do-loop.ts, papa.ts). Text must be verbatim from the post
-// or the quoted source; scene duration comes from the word count (~3 words/s reading speed).
+// Each Reel is a list of scenes adapted faithfully from the post.
+// Scene duration comes from the word count (~3 words/s reading speed).
 import { AbsoluteFill, Audio, Img, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion';
 import { paletteFor } from './palette.mjs';
+import { backgroundVolume } from './music-volume.mjs';
 import { loadFont } from '@remotion/fonts';
 
 loadFont({ family: 'SourceSerif', url: staticFile('fonts/ss-400.woff2'), weight: '400' });
@@ -120,8 +121,9 @@ const CenaView: React.FC<{ c: Cena; dur: number; paleta: Paleta }> = ({ c, dur, 
 
 export type EnsaioProps = { cenas: Cena[]; paleta: Paleta; musica?: string; volume?: number };
 
-export const Ensaio: React.FC<EnsaioProps> = ({ cenas, paleta, musica, volume = 0.6 }) => {
+export const Ensaio: React.FC<EnsaioProps> = ({ cenas, paleta, musica, volume = 0.18 }) => {
   const total = duracaoTotal(cenas);
+  const frame = useCurrentFrame();
   let ini = 0;
   return (
     <AbsoluteFill style={{ backgroundColor: paleta.fundo }}>
@@ -131,8 +133,7 @@ export const Ensaio: React.FC<EnsaioProps> = ({ cenas, paleta, musica, volume = 
         ini += dur;
         return <Sequence key={i} from={from} durationInFrames={dur}><CenaView c={c} dur={dur} paleta={paletteFor(cenas[0]?.texto ?? '', i)} /></Sequence>;
       })}
-      {musica && <Audio src={staticFile(musica)} volume={(f) => interpolate(f, [0, 30, total - 60, total], [0, volume, volume, 0], { extrapolateRight: 'clamp' })} />}
+      {musica && <Audio src={staticFile(musica)} loop volume={backgroundVolume(frame, total, volume)} />}
     </AbsoluteFill>
   );
 };
-

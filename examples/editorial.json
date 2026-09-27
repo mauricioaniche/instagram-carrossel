@@ -1,0 +1,84 @@
+[
+  {
+    "id": "dax",
+    "post": "O Dax, um dos criadores do OpenCode, deu um conselho que gostei muito sobre como ser bom no seu trabalho:\n- Perceber que algo é, na verdade, composto por duas coisas distintas\n- Perceber que, em vez de resolver o problema imediato, você pode resolver um problema mais amplo\n- Em vez de implementar uma coisa, implementar outra que facilite a implementação da primeira\nQuebrar um problema grande em um problema menor, e entender quando você deve resolver a classe inteira do problema ao invés daquela instância específica, separam bem aqueles que ainda estão no começo de carreira para pessoas mais sêniores!",
+    "carousel": {
+      "title": "Como ser um dev produtivo, de acordo com Dax, um dos criadores do OpenCode",
+      "coverText": "",
+      "slides": [
+        {
+          "heading": "Perceber que algo é, na verdade, composto por duas coisas distintas",
+          "body": ""
+        },
+        {
+          "heading": "Perceber que, em vez de resolver o problema imediato, você pode resolver um problema mais amplo",
+          "body": ""
+        },
+        {
+          "heading": "Em vez de implementar uma coisa, implementar outra que facilite a implementação da primeira",
+          "body": ""
+        },
+        {
+          "heading": "Quebrar um problema grande em um problema menor separa júniores de sêniores!",
+          "body": ""
+        }
+      ]
+    }
+  },
+  {
+    "id": "elizabeth",
+    "post": "O Lenny entrevistou a Elizabeth, CPTO do Netflix. Algumas das ideias que achei legal:\n\n- O pensamento sistêmico, conseguir olhar para o todo, é a habilidade mais importante nesse novo mundo da IA. E é possível aprender. Dê sempre um passo atrás, e tente entender melhor o problema que está resolvendo e como ele ajuda o negócio a ir pra frente.\n\n- A confusão em relação a cargos e carreiras é normal. Foque em qualidade, guardrails, e responsabilidade.\n\n- Excelência é fundamental. Em todos os sentidos. Pessoas boas, contexto e não controle, e um ambiente de confiança com responsabilidade são importantes.\n\n- Profissional em T é o profissional do futuro. Batemos muito nessa tecla na Alura.\n\nLink para o post original nos comentários.",
+    "carousel": {
+      "title": "O dev do futuro, de acordo com Elizabeth, CPTO do Netflix",
+      "coverText": "",
+      "slides": [
+        {
+          "heading": "Pensamento sistêmico é a habilidade mais importante nesse novo mundo de IA.",
+          "body": ""
+        },
+        {
+          "heading": "A confusão em relação a cargos e carreiras é normal. Foque em qualidade, guardrails, e responsabilidade.",
+          "body": ""
+        },
+        {
+          "heading": "Excelência é fundamental. Em todos os sentidos.",
+          "body": ""
+        },
+        {
+          "heading": "Profissional em T é o profissional do futuro.",
+          "body": ""
+        }
+      ]
+    }
+  },
+  {
+    "id": "finops",
+    "post": "FinOps pra IA está só começando. Vi um post legal do Brian Armstrong, co-founder do Coinbase.\n\n- A escolha do modelo padrão importa. O dev deve ser capaz de mudar de modelo, mas o modelo padrão importa, pois é o que o povo realmente usa. Eles estão usando modelos mais baratos como padrão e percebem que os devs não estão mais batendo nos seus limites de uso pessoais mais.\n\n- Melhor roteamento. O sistema vê o prompt do usuário e roteia para o melhor modelo. Por exemplo, se for uma tarefa de planejamento, um modelo mais avançado é melhor; mas para uma tarefa simples do dia-a-dia, um super modelo é demais.\n\n- Cache é importante. Fazer bom uso do cache é importante para reduzir custos.\n\n- Mantenha o contexto enxuto. Comece novas sessões quando começar uma nova tarefa. Adicione só o que precisar, incluindo arquivos e ferramentas. O objetivo não deve ser menos tokens usados, mas sim menos tokens desperdiçados.\n\n- Mais visibilidade. O time pode usar quantos tokens quiser, mas quanto mais token você usar, maior o impacto esperado de você.\n\nCom tudo isso em prática, os custos deles caíram pela metade enquanto o uso de tokens subiu!\n\nPra quem me acompanha aqui, sabe que eu sou fã (leia-se mão de vaca) da ideia de FinOps pra IA. Post original nos comentários.",
+    "carousel": {
+      "title": "FinOps pra IA está só começando. Veja dicas da Coinbase.",
+      "coverText": "",
+      "slides": [
+        {
+          "heading": "A escolha do modelo padrão importa.",
+          "body": "O dev deve ser capaz de mudar de modelo, mas o modelo padrão importa, pois é o que o povo realmente usa. Eles estão usando modelos mais baratos como padrão e percebem que os devs não estão mais batendo nos seus limites de uso pessoais mais."
+        },
+        {
+          "heading": "Melhor roteamento.",
+          "body": "O sistema vê o prompt do usuário e roteia para o melhor modelo. Por exemplo, se for uma tarefa de planejamento, um modelo mais avançado é melhor; mas para uma tarefa simples do dia-a-dia, um super modelo é demais."
+        },
+        {
+          "heading": "Cache é importante.",
+          "body": "Fazer bom uso do cache é importante para reduzir custos."
+        },
+        {
+          "heading": "Mantenha o contexto enxuto.",
+          "body": "Comece novas sessões quando começar uma nova tarefa. Adicione só o que precisar, incluindo arquivos e ferramentas. O objetivo não deve ser menos tokens usados, mas sim menos tokens desperdiçados."
+        },
+        {
+          "heading": "Mais visibilidade.",
+          "body": "O time pode usar quantos tokens quiser, mas quanto mais token você usar, maior o impacto esperado de você."
+        }
+      ]
+    }
+  }
+]

@@ -43,7 +43,8 @@ export async function generateScript(source, { temp, out, binary, model, timeout
   const text = normalizeText(source);
   const instructions = await readFile(new URL('./editorial-prompt.txt', import.meta.url), 'utf8');
   const schema = fileURLToPath(new URL('./script.schema.json', import.meta.url));
-  const basePrompt = `${instructions}\n${JSON.stringify({ post: text })}\n`;
+  const examples = JSON.parse(await readFile(new URL('../examples/editorial.json', import.meta.url), 'utf8'));
+  const basePrompt = `${instructions}\nReferências editoriais (entrada e carrossel de referência):\n${JSON.stringify(examples)}\nPost atual a adaptar:\n${JSON.stringify({ post: text })}\n`;
   await writeFile(join(out, 'prompt.txt'), basePrompt);
   let correction = '';
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -59,7 +60,7 @@ export async function generateScript(source, { temp, out, binary, model, timeout
     } catch (error) {
       if (attempt === 2) throw new Error(`Roteiro do Codex inválido após duas tentativas: ${error.message}`);
       console.log('O roteiro precisa de ajuste; solicitando uma correção ao Codex…');
-      correction = `\nUma tentativa anterior não passou na validação: ${error.message}\nGere novamente o roteiro completo respeitando os limites e usando somente trechos literais nos campos editoriais e mantendo a direção visual com índices válidos.\n`;
+      correction = `\nUma tentativa anterior não passou na validação: ${error.message}\nGere novamente o roteiro completo respeitando os limites, com reescrita fiel ao post atual, uma ideia por slide e direção visual com índices válidos. Não copie fatos dos exemplos para o post atual.\n`;
     }
   }
 }

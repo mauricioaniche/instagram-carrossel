@@ -10,7 +10,7 @@ import { generateScript } from './codex.mjs';
 
 const cli = fileURLToPath(new URL('../generate.mjs', import.meta.url));
 const source = 'Ideia principal. Detalhe secundário. Conclusão importante.';
-const selection = { visual: { prompt: 'A clean modern coding workspace in bright natural light.', description: 'Computação', scene: 0 }, title: 'Ideia principal.', reelTitle: 'Conclusão importante.', slides: ['Conclusão importante.'], scenes: [{ texto: 'Ideia principal.' }] };
+const selection = { visual: { prompt: 'A clean modern coding workspace in bright natural light.', description: 'Computação', scene: 0 }, title: 'Entenda a ideia principal', reelTitle: 'Conclusão importante.', slides: ['Conclusão importante.'], scenes: [{ texto: 'Ideia principal.' }] };
 function run(args) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [cli, ...args]);
@@ -53,15 +53,16 @@ test('CLI envia o post ao Codex e salva a seleção, sem renderizar no modo plan
 test('CLI pede correção para JSON inválido e aceita a segunda seleção válida', async t => {
   const f = await fixture(t, `
     const response = args[args.indexOf('--output-last-message') + 1];
+    if (response.endsWith('-2.json') && (!prompt.includes('reescrita fiel') || prompt.includes('somente trechos literais'))) process.exit(7);
     fs.writeFileSync(response, response.endsWith('-1.json') ? 'invalid json' : ${JSON.stringify(JSON.stringify(selection))});`);
   const result = await run(f.args);
   assert.equal(result.code, 0, result.stderr);
   assert.match(result.stdout, /correção/);
 });
 
-test('CLI falha sem fallback para o post inteiro quando o Codex falha ou inventa trechos', async t => {
+test('CLI falha sem fallback para o post inteiro quando o Codex falha ou retorna roteiro inválido', async t => {
   for (const body of ['process.stderr.write("login necessário"); process.exit(1);',
-    `fs.writeFileSync(args[args.indexOf('--output-last-message') + 1], ${JSON.stringify(JSON.stringify({ ...selection, title: 'Inventado' }))});`]) {
+    `fs.writeFileSync(args[args.indexOf('--output-last-message') + 1], ${JSON.stringify(JSON.stringify({ ...selection, title: '' }))});`]) {
     const f = await fixture(t, body);
     const result = await run(f.args);
     assert.equal(result.code, 1);
