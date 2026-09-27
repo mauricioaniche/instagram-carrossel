@@ -25,7 +25,13 @@ O setup baixa o Chromium para Playwright e Remotion. Se ele estiver ausente, o g
 
 Envie o texto de um post ou um JSON com vários textos, colado ou anexado. Por padrão, o agente prepara os dois formatos para cada post; você pode indicar um formato ou um subconjunto do lote. Não é necessário converter o conteúdo em arquivos `.txt`.
 
+Para **texto individual**, o agente primeiro apresenta aqui o texto completo da capa e de cada slide, em ordem, com a frase principal e o apoio separados, e pede sua aprovação. Você pode ajustar a redação quantas vezes precisar: a versão atualizada é reapresentada antes da geração. A busca de fotos e a geração do carrossel, da capa e do reel só começam depois da aprovação explícita, salvo se você dispensar essa revisão. O pedido inicial para gerar não aprova automaticamente o texto que ainda será proposto.
+
+O carrossel deve usar exatamente o texto e a ordem aprovados; o reel recebe uma adaptação mais curta que incorpora suas correções. Se for necessário mudar a redação ou a organização do carrossel, o agente pede nova aprovação. Essa etapa pertence ao atendimento pela conversa: a CLI não tem confirmação interativa nem opção de carregar um roteiro aprovado. Como cada execução refaz a seleção editorial, o agente deve preservar a versão aprovada ao preparar a renderização com os módulos do projeto, sem substituí-la por uma nova seleção automática.
+
 O agente inspeciona os campos reais do JSON, preserva a ordem e os IDs e mantém os comentários associados aos respectivos posts. Campos ambíguos precisam ser esclarecidos; não há um esquema de JSON obrigatório para o atendimento pela conversa. Para lotes, a entrega inclui um índice com os arquivos e as pendências de cada post. A geração local não publica no Instagram.
+
+Lotes JSON seguem o fluxo de geração por lote, sem essa pausa obrigatória, a menos que você peça para revisar os textos antes.
 
 ## Gerar pelo terminal
 
