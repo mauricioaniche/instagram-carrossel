@@ -17,7 +17,7 @@ npx codex login
 npm run setup
 ```
 
-A etapa editorial e a revisão visual usam o Codex autenticado. As fotos devem ser reais, gratuitas e escolhidas no Unsplash; não há geração de imagens nem necessidade de chave da API de imagens.
+A etapa editorial usa o Codex autenticado. As fotos devem ser reais, gratuitas e escolhidas no Unsplash; não há geração de imagens nem necessidade de chave da API de imagens.
 
 O setup baixa o Chromium para Playwright e Remotion. Se ele estiver ausente, o gerador tenta usar o Chrome instalado nos caminhos comuns de macOS/Linux. Também aceita `--browser "/caminho/do/chrome"`. Em Linux, se faltarem bibliotecas, execute `npx playwright install --with-deps chromium`.
 
@@ -98,8 +98,7 @@ out/<nome>-<timestamp>/
   capa-reel.png             # capa própria do reel
   musica.json               # faixa usada, volume e fades
   carrossel.html            # prévia com fontes embutidas
-  fotos/editorial.jpg       # foto aprovada (ou .png)
-  avaliacoes-fotos.json    # aprovação, notas e motivos
+  fotos/editorial.jpg       # foto selecionada (ou .png)
   roteiro.json              # texto de origem e seleção validada da IA
   prompt.txt                # instruções editoriais e texto enviados ao Codex
   codex-response-1.json     # resposta original para conferência
@@ -125,11 +124,11 @@ O Codex roda em uma pasta temporária, em modo `read-only`, com resposta estrutu
 ## Fotos gratuitas do Unsplash
 
 1. Gere o plano com `--plan-only` e consulte a direção visual em `roteiro.json`.
-2. Busque termos relacionados à conclusão em `https://unsplash.com/s/photos/<termo>?license=free`, por exemplo [programming](https://unsplash.com/s/photos/programming?license=free).
-3. Escolha uma foto real gratuita (não Unsplash+), clara, moderna, nítida, adequada ao recorte 4:5. Confira a página individual e baixe a foto.
+2. Faça três buscas com palavras-chave diferentes relacionadas ao tema em `https://unsplash.com/s/photos/<termo>?license=free`, por exemplo [programming](https://unsplash.com/s/photos/programming?license=free).
+3. Olhe os resultados das três buscas e escolha a foto mais pertinente. Confira na página individual que é uma foto real gratuita (não Unsplash+) e baixe-a. Não há uma etapa separada de revisão de qualidade.
 4. Execute o gerador com `--image` e `--image-url` conforme os exemplos acima.
 
-A busca e o download no site são manuais ou conduzidos pelo agente no navegador; a CLI não busca automaticamente no Unsplash. O Codex revisa a relação entre a foto e o post. Se reprovada, escolha outra e execute com uma nova pasta de saída. Um histórico impede repetir a mesma foto entre execuções.
+A busca e o download no site são manuais ou conduzidos pelo agente no navegador; a CLI não busca automaticamente no Unsplash. A CLI usa a foto selecionada sem outra chamada de revisão por IA ou notas de qualidade. Um histórico impede repetir a mesma foto entre execuções.
 
 A foto aparece só na capa do carrossel e em uma cena do reel. As páginas internas continuam com texto e cores variadas. `creditos-fotos.txt` contém a última linha da legenda: `Crédito da imagem: <link da página da foto>`.
 
@@ -165,14 +164,14 @@ Os testes automatizados usam um executável falso na fronteira com o Codex para 
 
 As fotos mantêm suas cores, com leve ajuste de luminosidade. Os fundos e painéis alternam carvão, azul-marinho e verde-escuro, com texto claro e cores estáveis ao renderizar o mesmo roteiro novamente. As capas usam Anton em caixa alta, uma aproximação da fonte condensada da referência StartSe (a fonte original não foi confirmada). Os slides internos usam Inter, com frase principal em negrito e explicação menor em peso regular, separadas por espaço generoso. O reel compartilha as cores sóbrias e mantém sua tipografia de cenas.
 
-### Revisão visual obrigatória
+### Seleção de fotos e revisão das mídias
 
-Cada imagem é anexada ao Codex junto com o texto completo do post. A IA inspeciona pertinência, qualidade, anatomia, composição e aparência moderna. Aprovação exige relevância e qualidade ≥ 8/10, limpeza e modernidade ≥ 7/10. `avaliacoes-fotos.json` registra os resultados e as correções solicitadas. Se a revisão falhar, a geração para. Avaliações de IA podem errar; confira a capa antes de publicar.
+Faça três buscas com termos diferentes, compare os resultados e escolha a foto mais pertinente ao post. Não revise a qualidade da foto em uma etapa separada nem abra rodadas adicionais por notas estéticas. A CLI valida o formato do arquivo, o endereço da página e o histórico de uso, sem chamar o Codex para avaliar a foto. Confira a licença gratuita e a origem real na página individual. A revisão dos slides renderizados continua necessária para conferir texto, recorte e legibilidade.
 
 ### Crédito na legenda
 
 Depois das hashtags, inclua `Fonte original: <link fornecido>` quando houver e termine com `Crédito da imagem: <link da página da foto no Unsplash>`. Essa linha substitui o aviso anterior de imagem gerada por IA. Conte também o link da fonte e o crédito no limite de caracteres. Para fotos reais sem geração ou alteração por IA, não ative o rótulo de IA só porque o Codex selecionou os trechos do texto. Se outro elemento da publicação for sintético, avalie-o separadamente.
 
-## Materiais já preparados
+## Materiais preparados
 
-Os arquivos locais em `out/` foram preservados na separação do repositório. Consulte `out/PUBLICACAO-MANUAL.md` ou `out/para-publicar/index.html` para acessar os 16 carrosséis preparados, em ordem, com suas legendas. Mídias, histórico e dependências ficam fora do Git.
+Consulte `out/index.html` para navegar pelo lote atual e baixar os carrosséis e as legendas. `out/lote.json` registra os IDs, datas, arquivos e pendências. Mídias, histórico e dependências ficam fora do Git.

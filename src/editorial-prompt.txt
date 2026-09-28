@@ -31,7 +31,7 @@ Direção visual (visual):
 - Escolha uma direção para buscar uma FOTO REAL GRATUITA no Unsplash. Não gere imagens por IA.
 - description: relação concreta entre o tema da foto e a ideia central do post, até 300 caracteres.
 - prompt: plano de busca em inglês (30 a 1800 caracteres), com três termos de busca específicos e diferentes, assunto, ação e composição desejados. Use https://unsplash.com/s/photos/<termo>?license=free . O campo mantém o nome prompt por compatibilidade; não é um pedido de geração.
-- Evite associar qualquer tema a um notebook: procure uma cena que ilustre a ideia central. Varie assunto, enquadramento e cores. Foto limpa, moderna, nítida, luminosa, com bom recorte vertical e espaço para o texto na parte inferior.
+- Evite associar qualquer tema a um notebook: procure uma cena que ilustre a ideia central. Varie assunto, enquadramento e cores. Compare os resultados das três buscas e selecione a foto mais pertinente, considerando o recorte vertical. Não faça uma etapa separada de revisão de qualidade da foto.
 - Não use Unsplash+, fotos pagas, logos em destaque, equipamentos antigos ou imagens sintéticas. Não apresente pessoas da foto como se fossem pessoas citadas no post.
 - Uma foto somente na capa do carrossel; páginas internas apenas texto, com frase principal em negrito e explicação regular mais abaixo quando necessária, sobre fundos sóbrios em carvão, azul-marinho ou verde-escuro. A capa do reel e uma única cena podem reutilizar a foto.
 - scene: índice da única cena com foto (0 = primeira).

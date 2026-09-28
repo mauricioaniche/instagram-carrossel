@@ -44,7 +44,7 @@ async function main() {
       console.log(`Roteiro gerado: ${join(out, 'roteiro.json')}`);
       return;
     }
-    console.log('Conferindo a foto do Unsplash e sua relação com o post…');
+    console.log('Preparando a foto selecionada no Unsplash…');
     await prepareUnsplashPhoto(post, out, { source, binary: codexBinary, model: values.model, imagePath: resolve(values.image), imageUrl: values['image-url'] });
     await writeFile(join(out, 'roteiro.json'), JSON.stringify(post, null, 2));
     const publicDir = join(temp, 'public');
