@@ -54,7 +54,7 @@ Esta seção documenta a ferramenta usada pelo agente e também permite execuç�
    npm run generate -- /caminho/meu-post.txt --image foto.jpg --image-url https://unsplash.com/photos/ID-DA-FOTO
    ```
 
-O comando envia o post ao Codex, adapta as ideias principais e gera o carrossel e o reel na mesma execução. As imagens mostram o conteúdo selecionado, sem “Ensaio”, “Continue a leitura”, assinatura do autor do perfil ou contador de página. Atribuições a pessoas citadas no post podem aparecer na capa. Isso também vale para a capa do reel.
+O comando envia o post ao Codex, adapta as ideias principais e gera o carrossel e o reel na mesma execução. Todas as imagens, incluindo a capa do reel, e todo o vídeo recebem a assinatura `Mauricio Aniche - @mauricio.alura` no canto inferior direito, em Inter de 28 px, com contraste e margem para o conteúdo. No reel e em sua capa, a posição respeita a área útil; no vídeo, a assinatura permanece visível durante as transições, sobre um pequeno fundo escuro. As imagens não incluem “Ensaio”, “Continue a leitura” ou contador de página. Atribuições a pessoas citadas no post podem aparecer na capa.
 
 Para testar com o exemplo incluído ou escolher a pasta de saída:
 

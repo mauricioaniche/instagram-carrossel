@@ -48,6 +48,7 @@
 
 ## Identidade visual
 
+- Inclua sempre a assinatura exata `Mauricio Aniche - @mauricio.alura` no canto inferior direito de todas as imagens do carrossel, da capa do reel e durante todo o vídeo, inclusive nas transições. Use Inter em tamanho discreto e legível (28 px em 1080 px de largura), contraste com o fundo e espaço separado do conteúdo. No reel e em sua capa, respeite as margens da área útil para evitar os controles da interface.
 - Use estética de ensaio editorial, inspirada em livros e revistas. Referências: https://www.instagram.com/p/Dd1CIcgFSVF/?img_index=1 e https://www.instagram.com/p/Dd3rl8AFZgG/?img_index=1 . A família exata das referências não foi confirmada; Source Serif 4 é a aproximação adotada.
 - Use Source Serif 4 nos títulos (700) e explicações (400), com maiúsculas e minúsculas naturais. Não use Anton nem títulos inteiros em caixa alta. Reserve Inter para pequenas informações secundárias; itálico é pontual, para subtítulos ou títulos de obras.
 - Nas páginas sem foto, varie os fundos de forma planejada entre tons sóbrios: marfim `#F3EFE5`, azul-escuro `#172A3A`, grafite `#25282B` e verde-petróleo `#203B3B`. Use tons diferentes nas páginas sem foto do mesmo carrossel, com texto `#191814` sobre fundo claro e `#F3EFE5` sobre fundo escuro. Detalhes discretos em terracota `#A54B38` no claro ou areia `#D1B894` no escuro. Não use cores vibrantes; confira contraste e legibilidade.

@@ -4,6 +4,7 @@
 // Scene duration comes from the word count (~3 words/s reading speed).
 import { AbsoluteFill, Audio, Img, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion';
 import { backgroundVolume } from './music-volume.mjs';
+import { signature } from './branding.mjs';
 import { loadFont } from '@remotion/fonts';
 
 loadFont({ family: 'SourceSerif', url: staticFile('fonts/ss-400.woff2'), weight: '400' });
@@ -132,6 +133,11 @@ export const Ensaio: React.FC<EnsaioProps> = ({ cenas, paleta, musica, volume = 
         ini += dur;
         return <Sequence key={i} from={from} durationInFrames={dur}><CenaView c={c} dur={dur} paleta={paleta} /></Sequence>;
       })}
+      {/* Outside scene fades: attribution stays visible even on transition frames. */}
+      <div style={{ position: 'absolute', right: 170, bottom: 340, zIndex: 1,
+        fontFamily: 'InterUI', fontWeight: 500, fontSize: 28, lineHeight: 1.4,
+        whiteSpace: 'nowrap', textAlign: 'right', color: '#F3EFE5',
+        backgroundColor: '#191814', padding: '8px 12px' }}>{signature}</div>
       {musica && <Audio src={staticFile(musica)} loop volume={backgroundVolume(frame, total, volume)} />}
     </AbsoluteFill>
   );

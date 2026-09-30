@@ -1,10 +1,12 @@
 import { paletteFor } from './palette.mjs';
+import { signature } from './branding.mjs';
 const escape = (text) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export function carouselHtml(post, fonts) {
   const colors = theme => { const p = paletteFor(post.title, 0, theme); return `--bg:${p.fundo};--ink:${p.texto};--accent:${p.acento}`; };
   const items = [{ heading: post.title, body: post.coverText || '', photo: post.photo }, ...post.slides.map(s => typeof s === 'string' ? { heading: s, body: '' } : s)];
   const photo = p => p ? `<img class="photo" src="fotos/${escape(p.file)}" alt="${escape(p.description || post.visual?.description || '')}">` : '';
+  const attribution = `<div class="signature">${escape(signature)}</div>`;
   const headingSize = (item, cover) => cover ? (item.heading.length > 65 ? 100 : item.heading.length > 35 ? 112 : 128) : (item.body || item.heading.length > 100 ? 72 : item.heading.length > 65 ? 84 : 96);
   return `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>${escape(post.title)}</title>
 <style>
@@ -26,10 +28,12 @@ h1,h2,p{font-family:SourceSerif,Georgia,serif;margin:0;white-space:pre-wrap;over
 .support{font-size:48px;font-weight:400;line-height:1.3;margin-top:52px}
 .dense .support{font-size:44px}.opening .support{font-size:48px;margin-top:36px}
 .cover{height:1920px}.cover .content{top:420px;bottom:420px}.cover.illustrated .content{top:auto;bottom:420px;max-height:1080px}
+.signature{position:absolute;right:96px;bottom:40px;z-index:1;font-family:Inter,Arial,sans-serif;font-size:28px;font-weight:400;line-height:1.4;white-space:nowrap;text-align:right;color:inherit}
+.cover .signature{right:170px;bottom:340px}
 </style><body>${items.map((item, i) => {
     const isCover = i === 0;
     const classes = ['slide', isCover ? 'opening' : '', item.photo ? (isCover ? 'illustrated' : 'photo-slide') : '', item.body?.length > 240 ? 'dense' : ''].filter(Boolean).join(' ');
-    return `<section style="${colors(item.theme || post.theme)}" class="${classes}">${photo(item.photo)}${isCover && item.photo ? '<div class="shade"></div>' : ''}<div class="content"><div class="rule"></div><h2 class="heading" style="font-size:${headingSize(item, isCover)}px">${escape(item.heading)}</h2>${item.body ? `<p class="support">${escape(item.body)}</p>` : ''}</div></section>`;
+    return `<section style="${colors(item.theme || post.theme)}" class="${classes}">${photo(item.photo)}${isCover && item.photo ? '<div class="shade"></div>' : ''}<div class="content"><div class="rule"></div><h2 class="heading" style="font-size:${headingSize(item, isCover)}px">${escape(item.heading)}</h2>${item.body ? `<p class="support">${escape(item.body)}</p>` : ''}</div>${attribution}</section>`;
   }).join('')}
-<section style="${colors(post.theme)}" class="slide cover ${post.photo ? 'illustrated' : ''}">${photo(post.photo)}${post.photo ? '<div class="shade"></div>' : ''}<div class="content"><div class="rule"></div><p class="heading" style="font-size:${headingSize({ heading: post.reelTitle }, true)}px">${escape(post.reelTitle)}</p></div></section></body></html>`;
+<section style="${colors(post.theme)}" class="slide cover ${post.photo ? 'illustrated' : ''}">${photo(post.photo)}${post.photo ? '<div class="shade"></div>' : ''}<div class="content"><div class="rule"></div><p class="heading" style="font-size:${headingSize({ heading: post.reelTitle }, true)}px">${escape(post.reelTitle)}</p></div>${attribution}</section></body></html>`;
 }
