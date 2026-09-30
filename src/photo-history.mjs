@@ -14,7 +14,7 @@ async function scan(root, entries) {
     const path = join(root, f.name);
     if (f.isDirectory()) await scan(path, entries);
     else if (f.name === 'licencas.json') {
-      try { const p = JSON.parse(await readFile(path, 'utf8')); if (p.sourceUrl) entries.push(photoKey(p)); } catch {}
+      try { const p = JSON.parse(await readFile(path, 'utf8')); for (const photo of Array.isArray(p) ? p : [p]) if (photo.sourceUrl) entries.push(photoKey(photo)); } catch {}
     }
   }
 }

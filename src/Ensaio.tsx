@@ -3,7 +3,6 @@
 // Each Reel is a list of scenes adapted faithfully from the post.
 // Scene duration comes from the word count (~3 words/s reading speed).
 import { AbsoluteFill, Audio, Img, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion';
-import { paletteFor } from './palette.mjs';
 import { backgroundVolume } from './music-volume.mjs';
 import { loadFont } from '@remotion/fonts';
 
@@ -18,7 +17,7 @@ export type Cena = {
   kicker?: string;
   foto?: string; // file in public/fotos/
   pos?: string; // object-position of the photo
-  cor?: boolean; // keep photo colors (default: original colors)
+  cor?: boolean; // keep photo colors (default: black and white)
   destaque?: string; // words painted with the accent color
   tam?: number; // font size (default by length)
   italico?: boolean;
@@ -72,7 +71,7 @@ const Dados: React.FC<{ c: Cena; acento: string }> = ({ c, acento }) => {
       {c.dados!.map((d, i) => {
         const o = interpolate(f - inicio - i * 30, [0, 12], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
         return (
-          <div key={i} style={{ opacity: o, transform: `translateX(${interpolate(o, [0, 1], [-40, 0])}px)`, display: 'flex', alignItems: 'center', gap: 40, padding: '34px 0', borderTop: '2px solid rgba(255,255,255,.18)' }}>
+          <div key={i} style={{ opacity: o, transform: `translateX(${interpolate(o, [0, 1], [-40, 0])}px)`, display: 'flex', alignItems: 'center', gap: 40, padding: '34px 0', borderTop: '2px solid currentColor' }}>
             {d.sobe === undefined ? (
               <div style={{ flex: 'none', width: 12, alignSelf: 'stretch', background: acento, borderRadius: 6, marginRight: 20 }} />
             ) : (
@@ -81,8 +80,8 @@ const Dados: React.FC<{ c: Cena; acento: string }> = ({ c, acento }) => {
               </svg>
             )}
             <span>
-              <div style={{ fontFamily: 'InterUI', fontWeight: 600, fontSize: 80, lineHeight: 1.1, color: '#fff' }}>{d.valor}</div>
-              <div style={{ fontFamily: 'InterUI', fontWeight: 500, fontSize: 50, color: '#bbb', marginTop: 10 }}>{d.rotulo}</div>
+              <div style={{ fontFamily: 'InterUI', fontWeight: 600, fontSize: 80, lineHeight: 1.1, color: 'inherit' }}>{d.valor}</div>
+              <div style={{ fontFamily: 'InterUI', fontWeight: 500, fontSize: 50, color: 'inherit', marginTop: 10 }}>{d.rotulo}</div>
             </span>
           </div>
         );
@@ -99,21 +98,21 @@ const CenaView: React.FC<{ c: Cena; dur: number; paleta: Paleta }> = ({ c, dur, 
     <AbsoluteFill style={{ backgroundColor: paleta.fundo, opacity: fade }}>
       {c.foto && (
         <>
-          <Img src={staticFile(`fotos/${c.foto}`)} style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.pos, transform: `scale(${zoom})`, filter: c.cor === false ? 'grayscale(1)' : 'saturate(1.08) brightness(1.05)' }} />
-          <AbsoluteFill style={{ background: `linear-gradient(180deg, transparent 25%, ${paleta.fundo} 90%)` }} />
+          <Img src={staticFile(`fotos/${c.foto}`)} style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.pos, transform: `scale(${zoom})`, filter: c.cor === true ? 'saturate(.65)' : 'grayscale(1)' }} />
+          <AbsoluteFill style={{ background: 'linear-gradient(180deg, rgba(0,0,0,.08) 15%, rgba(0,0,0,.65) 52%, rgba(0,0,0,.94) 100%)' }} />
         </>
       )}
       {/* content between y=250 and y=1500 (Reels UI safe zone), right margin 170 */}
-      <div style={{ position: 'absolute', left: 70, right: 150, padding: 30, borderRadius: 24, color: paleta.texto ?? '#22345A', background: paleta.fundo, top: c.foto ? 880 : c.figura ? 300 : c.dados ? 400 : 620 }}>
+      <div style={{ position: 'absolute', left: 96, right: 170, color: c.foto ? '#F3EFE5' : paleta.texto ?? '#191814', top: c.foto ? 880 : c.figura ? 300 : c.dados ? 400 : 620 }}>
         {c.figura && (
           <div style={{ height: c.figAlt ?? 620, marginBottom: 60, borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,.15)', opacity: interpolate(f, [4, 16], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }), transform: `scale(${interpolate(f, [0, dur], [1, 1.03])})` }}>
             <Img src={staticFile(`fotos/${c.figura}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.figPos ?? '50% 50%' }} />
           </div>
         )}
-        {c.kicker && <div style={{ fontFamily: 'InterUI', fontWeight: 600, fontSize: 32, letterSpacing: '0.14em', color: paleta.acento, marginBottom: 30 }}>{c.kicker}</div>}
-        <Palavras c={c} dur={dur} acento={paleta.acento} />
-        {c.dados && <Dados c={c} acento={paleta.acento} />}
-        {c.rodape && <div style={{ fontFamily: 'InterUI', fontWeight: 500, fontSize: 42, color: '#bbb', marginTop: 70, opacity: interpolate(f, [50, 70], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) }}>{c.rodape}</div>}
+        {c.kicker && <div style={{ fontFamily: 'InterUI', fontWeight: 600, fontSize: 32, letterSpacing: '0.14em', color: c.foto ? '#D1B894' : paleta.acento, marginBottom: 30 }}>{c.kicker}</div>}
+        <Palavras c={c} dur={dur} acento={c.foto ? '#D1B894' : paleta.acento} />
+        {c.dados && <Dados c={c} acento={c.foto ? '#D1B894' : paleta.acento} />}
+        {c.rodape && <div style={{ fontFamily: 'InterUI', fontWeight: 500, fontSize: 42, color: 'inherit', marginTop: 70, opacity: interpolate(f, [50, 70], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) }}>{c.rodape}</div>}
       </div>
     </AbsoluteFill>
   );
@@ -131,7 +130,7 @@ export const Ensaio: React.FC<EnsaioProps> = ({ cenas, paleta, musica, volume = 
         const dur = duracaoCena(c);
         const from = ini;
         ini += dur;
-        return <Sequence key={i} from={from} durationInFrames={dur}><CenaView c={c} dur={dur} paleta={paletteFor(cenas[0]?.texto ?? '', i)} /></Sequence>;
+        return <Sequence key={i} from={from} durationInFrames={dur}><CenaView c={c} dur={dur} paleta={paleta} /></Sequence>;
       })}
       {musica && <Audio src={staticFile(musica)} loop volume={backgroundVolume(frame, total, volume)} />}
     </AbsoluteFill>

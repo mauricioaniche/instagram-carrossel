@@ -5,3 +5,15 @@ out/
 .env
 .env.*
 !.env.example
+
+# Entradas pessoais e credenciais locais
+inputs/
+.codex/
+.auth/
+playwright/.auth/
+*.pem
+*.key
+
+# Novas trilhas ficam locais; arquivos já rastreados exigem remoção explícita
+music/*
+!music/README.md

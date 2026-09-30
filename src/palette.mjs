@@ -1,11 +1,12 @@
-// Sober backgrounds and high-contrast text; stable when rerendering a post.
+// Sober editorial tones, selected explicitly for each page.
 export const palettes = [
-  { fundo: '#111315', texto: '#F5F5F2', acento: '#73B9B2' },
-  { fundo: '#101C2D', texto: '#F3F5F7', acento: '#8FAECB' },
-  { fundo: '#112923', texto: '#F1F5F2', acento: '#8AB8A6' },
+  { fundo: '#F3EFE5', texto: '#191814', acento: '#A54B38' },
+  { fundo: '#191814', texto: '#F3EFE5', acento: '#D1B894' },
+  { fundo: '#172A3A', texto: '#F3EFE5', acento: '#D1B894' },
+  { fundo: '#25282B', texto: '#F3EFE5', acento: '#D1B894' },
+  { fundo: '#203B3B', texto: '#F3EFE5', acento: '#D1B894' },
 ];
-export function paletteFor(text, index = 0) {
-  let hash = 0;
-  for (const c of text) hash = (Math.imul(hash, 31) + c.codePointAt(0)) >>> 0;
-  return palettes[(hash + index) % palettes.length];
+export function paletteFor(_text, _index = 0, theme = 'light') {
+  const themes = { light: 0, dark: 1, navy: 2, slate: 3, petrol: 4 };
+  return palettes[themes[theme] ?? 0];
 }

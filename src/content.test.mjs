@@ -48,7 +48,7 @@ test('valida direção visual e índices existentes', () => {
   assert.deepEqual(validateScript(script, source).visual, script.visual);
   for (const visual of [undefined, { ...script.visual, scene: 1 }, { ...script.visual, prompt: '' }]) assert.throws(() => validateScript({ ...script, visual }, source), /visual/);
 });
-test('imagem somente na capa do carrossel e na capa separada do reel', () => {
+test('sem fotos internas explícitas, imagem apenas nas capas', () => {
   const html = carouselHtml({ ...script, photo: { file: 'editorial.jpg' } }, { display: '', regular: '', bold: '' });
   const carouselSections = html.split('<section').slice(1, -1);
   assert.ok(carouselSections[0].includes('<img class="photo"'));
@@ -83,4 +83,19 @@ test('permite carrosséis longos sem relaxar os limites do reel', () => {
   const slides = Array.from({ length: 19 }, (_, i) => ({ heading: `Ponto ${i + 1}`, body: '' }));
   assert.equal(validateScript({ ...script, slides }, source).slides.length, 19);
   assert.throws(() => validateScript({ ...script, scenes: Array(9).fill({ texto: 'Uma ideia.' }) }, source), /1 a 8 cenas/);
+});
+
+test('foto interna aparece apenas no slide associado, sem alterar texto ou capas', () => {
+  const html = carouselHtml({ ...script,
+    photo: { file: 'cover.jpg' },
+    slides: [{ heading: 'Texto aprovado', body: 'Detalhe preservado', photo: { file: 'inside.jpg', description: 'Foto contextual' } }, { heading: 'Outra ideia', body: '' }],
+  }, { regular: '', bold: '' });
+  const sections = html.split('<section').slice(1);
+  assert.ok(sections[0].includes('fotos/cover.jpg'));
+  assert.ok(sections[1].includes('fotos/inside.jpg'));
+  assert.ok(sections[1].includes('Texto aprovado'));
+  assert.ok(sections[1].includes('Detalhe preservado'));
+  assert.ok(!sections[2].includes('<img'));
+  assert.ok(sections[3].includes('fotos/cover.jpg'));
+  assert.equal((html.match(/fotos\/inside.jpg/g) || []).length, 1);
 });

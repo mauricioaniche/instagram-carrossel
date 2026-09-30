@@ -10,6 +10,7 @@ import { generateScript } from './src/codex.mjs';
 import { prepareUnsplashPhoto } from './src/unsplash.mjs';
 import { paletteFor } from './src/palette.mjs';
 import { carouselHtml } from './src/carousel.mjs';
+import { loadCarouselFonts } from './src/fonts.mjs';
 import { selectMusic, prepareMusic } from './src/music.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -54,20 +55,13 @@ async function main() {
     const fontsDir = join(publicDir, 'fonts');
     await mkdir(fontsDir, { recursive: true });
     for (const [dest, pkg, source] of [
-      ['anton-400', 'anton', 'anton-latin-400-normal'],
-      ['inter-400', 'inter', 'inter-latin-400-normal'],
-      ['inter-700', 'inter', 'inter-latin-700-normal'],
       ['ss-400', 'source-serif-4', 'source-serif-4-latin-400-normal'],
       ['ss-400i', 'source-serif-4', 'source-serif-4-latin-400-italic'],
       ['ss-700', 'source-serif-4', 'source-serif-4-latin-700-normal'],
       ['inter-500', 'inter', 'inter-latin-500-normal'],
       ['inter-600', 'inter', 'inter-latin-600-normal'],
     ]) await copyFile(join(root, 'node_modules', '@fontsource', pkg, 'files', `${source}.woff2`), join(fontsDir, `${dest}.woff2`));
-    const fonts = {
-      display: (await readFile(join(fontsDir, 'anton-400.woff2'))).toString('base64'),
-      regular: (await readFile(join(fontsDir, 'inter-400.woff2'))).toString('base64'),
-      bold: (await readFile(join(fontsDir, 'inter-700.woff2'))).toString('base64'),
-    };
+    const fonts = await loadCarouselFonts();
     const html = join(out, 'carrossel.html');
     await writeFile(html, carouselHtml(post, fonts));
     const { chromium } = await import('playwright');
@@ -84,12 +78,27 @@ async function main() {
       await document.fonts.ready;
       await Promise.all([...document.images].map(image => image.decode()));
     });
-    const overflow = await page.locator('.content').evaluateAll(nodes => nodes.some(n => n.scrollHeight > n.clientHeight || n.scrollWidth > n.clientWidth));
+    const overflow = await page.locator('.content').evaluateAll(nodes => nodes.some(n => {
+      const bounds = n.getBoundingClientRect();
+      return n.scrollHeight > n.clientHeight || n.scrollWidth > n.clientWidth || [...n.children].some(child => {
+        const rect = child.getBoundingClientRect();
+        return rect.top < bounds.top - 1 || rect.bottom > bounds.bottom + 1 || rect.left < bounds.left - 1 || rect.right > bounds.right + 1;
+      });
+    }));
     if (overflow) throw new Error('O roteiro ultrapassa a área disponível. Distribua o desenvolvimento em mais slides ou resuma a explicação, preservando as ideias e a legibilidade.');
     await mkdir(join(out, 'carrossel'));
-    const slides = page.locator('.slide:not(.cover)');
-    for (let i = 0; i < await slides.count(); i++) await slides.nth(i).screenshot({ path: join(out, 'carrossel', `${String(i + 1).padStart(2, '0')}.png`) });
-    await page.locator('.cover').screenshot({ path: join(out, 'capa-reel.png') });
+    // Isolate each page at the origin: sequential element screenshots can shift
+    // the capture region when Chromium scrolls a long document between slides.
+    const slides = page.locator('.slide');
+    const count = await slides.count();
+    for (let i = 0; i < count; i++) {
+      await page.evaluate(index => {
+        document.querySelectorAll('.slide').forEach((slide, n) => { slide.style.display = n === index ? 'block' : 'none'; });
+        window.scrollTo(0, 0);
+      }, i);
+      const path = i === count - 1 ? join(out, 'capa-reel.png') : join(out, 'carrossel', `${String(i + 1).padStart(2, '0')}.png`);
+      await slides.nth(i).screenshot({ path });
+    }
     await browser.close();
     browser = undefined;
     console.log(`Carrossel: ${post.slides.length + 1} slides. Renderizando ${post.scenes.length} cenas do reel…`);

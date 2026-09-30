@@ -1,6 +1,6 @@
 # Instagram Carrossel
 
-O usuário envia **texto ou JSON por esta conversa**. O agente organiza os posts, prepara as entradas do gerador e entrega carrosséis, reels, capas e legendas. As regras desse atendimento estão em [AGENTS.md](AGENTS.md).
+Transforme o **texto de um post** em um carrossel e um reel com estética editorial. Em uma conversa com um agente de programação, envie o texto colado ou anexado: o agente prepara as entradas do gerador e entrega carrossel, reel, capas e legendas. As regras desse atendimento estão em [AGENTS.md](AGENTS.md).
 
 Internamente, o gerador de terminal recebe um `.txt` por post, chama o **Codex CLI para selecionar as ideias principais** e renderiza um carrossel de PNGs **1080 × 1350**, um reel MP4 H.264 **1080 × 1920 / 30 fps** e sua capa.
 
@@ -8,34 +8,35 @@ Adaptado do [gist de Paulo Silveira (peas)](https://gist.github.com/peas/2f224fb
 
 ## Instalação
 
-Node.js 22 ou superior. O [Codex CLI](https://developers.openai.com/codex/cli) já faz parte das dependências do gerador, com versão fixada:
+Requisitos: Git, Node.js 22 ou superior, npm e acesso autenticado ao Codex. O [Codex CLI](https://developers.openai.com/codex/cli) já faz parte das dependências do gerador, com versão fixada:
 
 ```bash
-cd ~/workspace/instagram-carrossel
+git clone https://github.com/mauricioaniche/instagram-carrossel.git
+cd instagram-carrossel
 npm ci
 npx codex login
 npm run setup
 ```
 
+Antes de gerar um reel, adicione à pasta `music/` uma trilha que você tenha autorização para usar. Para conferir a instalação sem chamar IA, execute `npm test` e `node generate.mjs --help`.
+
 A etapa editorial usa o Codex autenticado. As fotos devem ser reais, gratuitas e escolhidas no Unsplash; não há geração de imagens nem necessidade de chave da API de imagens.
 
-O setup baixa o Chromium para Playwright e Remotion. Se ele estiver ausente, o gerador tenta usar o Chrome instalado nos caminhos comuns de macOS/Linux. Também aceita `--browser "/caminho/do/chrome"`. Em Linux, se faltarem bibliotecas, execute `npx playwright install --with-deps chromium`.
+O setup baixa o Chromium, usado pelo Playwright e pelo Remotion. Se ele estiver ausente, o gerador tenta usar o Chrome instalado nos caminhos comuns de macOS/Linux. Também aceita `--browser "/caminho/do/chrome"`. Em Linux, se faltarem bibliotecas, execute `npx playwright install --with-deps chromium`.
 
 ## Entrada pela conversa
 
-Envie o texto de um post ou um JSON com vários textos, colado ou anexado. Por padrão, o agente prepara os dois formatos para cada post; você pode indicar um formato ou um subconjunto do lote. Não é necessário converter o conteúdo em arquivos `.txt`.
+Abra a pasta clonada no seu agente de programação e peça que leia `AGENTS.md`. Envie o texto de um post, colado ou anexado. Por padrão, o agente prepara os dois formatos; você pode pedir somente um deles. Não é necessário converter o conteúdo em arquivos `.txt`.
 
 Para **texto individual**, o agente primeiro apresenta aqui o texto completo da capa e de cada slide, em ordem, com a frase principal e o apoio separados, e pede sua aprovação. Você pode ajustar a redação quantas vezes precisar: a versão atualizada é reapresentada antes da geração. A busca de fotos e a geração do carrossel, da capa e do reel só começam depois da aprovação explícita, salvo se você dispensar essa revisão. O pedido inicial para gerar não aprova automaticamente o texto que ainda será proposto.
 
 O carrossel deve usar exatamente o texto e a ordem aprovados; o reel recebe uma adaptação mais curta que incorpora suas correções. Se for necessário mudar a redação ou a organização do carrossel, o agente pede nova aprovação. Essa etapa pertence ao atendimento pela conversa: a CLI não tem confirmação interativa nem opção de carregar um roteiro aprovado. Como cada execução refaz a seleção editorial, o agente deve preservar a versão aprovada ao preparar a renderização com os módulos do projeto, sem substituí-la por uma nova seleção automática.
 
-O agente inspeciona os campos reais do JSON, preserva a ordem e os IDs e mantém os comentários associados aos respectivos posts. Campos ambíguos precisam ser esclarecidos; não há um esquema de JSON obrigatório para o atendimento pela conversa. Para lotes, a entrega inclui um índice com os arquivos e as pendências de cada post. A geração local não publica no Instagram.
-
-Lotes JSON seguem o fluxo de geração por lote, sem essa pausa obrigatória, a menos que você peça para revisar os textos antes.
+A geração local não publica no Instagram.
 
 ## Gerar pelo terminal
 
-Esta seção documenta a ferramenta usada pelo agente e também permite execução manual. A CLI aceita **um arquivo `.txt` com o texto de um único post**. Ela não importa diretamente JSON: o agente prepara um `.txt` por post e mantém comentários e metadados separados.
+Esta seção documenta a ferramenta usada pelo agente e também permite execução manual. A CLI aceita **um arquivo `.txt` com o texto de um único post**. Comentários e links de referência são preparados separadamente pelo agente.
 
 1. Salve o texto do post em `meu-post.txt`, em UTF-8, com os parágrafos habituais. Por exemplo:
 
@@ -47,7 +48,7 @@ Esta seção documenta a ferramenta usada pelo agente e também permite execuç�
    Depois, revise o resultado e verifique se a solução continua fácil de entender e manter.
    ```
 
-2. Dentro de `~/workspace/instagram-carrossel/`, execute:
+2. Na pasta clonada do projeto, execute:
 
    ```bash
    npm run generate -- /caminho/meu-post.txt --image foto.jpg --image-url https://unsplash.com/photos/ID-DA-FOTO
@@ -111,11 +112,11 @@ O prompt em `src/editorial-prompt.txt` pede dois roteiros independentes: um carr
 
 A capa pode apresentar uma chamada específica para o conteúdo ou resumir a ideia principal. Pode citar a pessoa, o cargo ou a empresa do original quando isso ajudar a contextualizar os conselhos. Por exemplo: “Como ser um dev produtivo, de acordo com Dax, um dos criadores do OpenCode”. Não há obrigação de entregar a conclusão na primeira imagem; chamadas genéricas e clickbait devem ser evitados.
 
-Cada slide interno desenvolve uma ideia. Quando ela for curta, basta uma frase. Quando houver detalhes, a frase principal fica em negrito e a explicação em peso regular abaixo. Prefira mais páginas a reunir várias ideias numa imagem. Não corte itens centrais de uma lista para atingir uma quantidade fixa de slides e não invente explicações para preencher espaço. O tom é profissional, técnico e direto.
+Cada slide interno desenvolve uma ideia. Quando ela for curta, basta uma frase. Quando houver detalhes, a frase principal fica em negrito e a explicação em peso regular abaixo. Use no máximo 5 imagens, incluindo a capa. Sintetize pontos relacionados sob uma ideia central, preserve ressalvas e reserve detalhes complementares para a legenda. Não reúna ideias desconexas nem invente explicações para preencher espaço. Se o conteúdo não couber com fidelidade, sinalize o conflito na proposta editorial. O tom é profissional, técnico e direto.
 
 Os três exemplos em `examples/editorial.json` acompanham o prompt como referências de estilo: conselhos de Dax, competências na entrevista de Elizabeth e recomendações de FinOps da Coinbase. Seus fatos não devem ser transferidos para outros posts.
 
-Limites: capa de até 100 caracteres e complemento opcional de até 160; de 1 a 19 páginas internas com frase principal de até 140 caracteres e explicação opcional de até 320. São limites do gerador, não metas de preenchimento. Com explicação longa, prefira um título curto; distribua o desenvolvimento em mais páginas quando necessário. O reel permite de 1 a 8 cenas de até 140 caracteres, mira 30–40 segundos e é validado para no máximo 45; posts curtos podem gerar vídeos menores.
+Limites: capa de até 100 caracteres e complemento opcional de até 160; de 1 a 4 páginas internas no padrão editorial (máximo de 5 imagens com a capa; a capacidade técnica do gerador continua sendo de 19 internas) com frase principal de até 140 caracteres e explicação opcional de até 320. São tetos, não metas de preenchimento. Com explicação longa, prefira um título curto; distribua o desenvolvimento dentro do limite de 5 imagens quando necessário. O reel permite de 1 a 8 cenas de até 140 caracteres, mira 30–40 segundos e é validado para no máximo 45; posts curtos podem gerar vídeos menores.
 
 A validação automática confere estrutura, tamanho e duração. Ela **não comprova fidelidade semântica**: compare o roteiro com o original e revise fatos, atribuições, contexto e cobertura das ideias antes de entregar as mídias. A renderização também verifica transbordamento, e a revisão visual continua obrigatória.
 
@@ -130,7 +131,22 @@ O Codex roda em uma pasta temporária, em modo `read-only`, com resposta estrutu
 
 A busca e o download no site são manuais ou conduzidos pelo agente no navegador; a CLI não busca automaticamente no Unsplash. A CLI usa a foto selecionada sem outra chamada de revisão por IA ou notas de qualidade. Um histórico impede repetir a mesma foto entre execuções.
 
-A foto aparece só na capa do carrossel e em uma cena do reel. As páginas internas continuam com texto e cores variadas. `creditos-fotos.txt` contém a última linha da legenda: `Crédito da imagem: <link da página da foto>`.
+A CLI coloca a foto na capa do carrossel, na capa do reel e em uma cena do vídeo. No fluxo conduzido pelo agente, alterne sempre foto e texto: imagens 1, 3 e 5 com foto; 2 e 4 sem foto, quando existirem. As fotos internas contextualizam o argumento e aparecem na parte superior, com texto abaixo. A CLI não associa fotos internas automaticamente.
+
+Ao renderizar um roteiro aprovado com os módulos, use `loadCarouselFonts()` de `src/fonts.mjs` e `carouselHtml(post, fonts)`. Para adicionar uma foto interna antes da renderização:
+
+```js
+await prepareUnsplashPhoto(post, out, {
+  imagePath: '/caminho/foto.jpg',
+  imageUrl: 'https://unsplash.com/photos/ID-DA-FOTO',
+  slideIndex: 1, // imagem 3; use 3 para a imagem 5, quando existir
+  description: 'Descrição da cena e sua relação com o argumento',
+});
+```
+
+A busca, a licença e a pertinência devem ser conferidas para cada foto. A função preserva o texto e associa `photo` ao slide; não altera a foto do reel. Salve o `post` atualizado em `roteiro.json`. `fotos/licencas.json` guarda um objeto quando há uma foto e uma lista quando há várias; o histórico considera todas. `creditos-fotos.txt` reúne os links na linha `Crédito da imagem: <links das páginas das fotos>`. Na legenda do reel, use apenas o crédito da foto que ele utiliza.
+
+Nas páginas sem foto, varie os fundos entre marfim, azul-escuro, grafite e verde-petróleo. Os módulos aceitam `post.slides[i].theme` com `light`, `navy`, `slate`, `petrol` ou `dark`. Defina tons diferentes nas imagens 2 e 4; use texto claro nos fundos escuros. Esses ajustes visuais são feitos após a validação editorial, sem reescrever o texto aprovado.
 
 Arquivos antigos não são alterados. O comando gera mídia local e não publica no Instagram. Todo reel recebe uma música de fundo da pasta `music/`.
 
@@ -146,9 +162,9 @@ O agente prepara as legendas à parte, usando o corpo completo do post ou um res
 
 Se o texto ou o material fornecido com o post incluir o link da fonte original, inclua-o nas duas legendas, imediatamente acima do crédito da imagem, mesmo quando também houver um comentário separado com esse link. Use somente os links fornecidos e associados ao post; não invente uma fonte quando ela estiver ausente.
 
-Comentários de referência, quando fornecidos, são preservados separadamente e associados ao ID do post após conferir a estrutura real do JSON. Não invente links nem considere que “link nos comentários” significa que a referência já foi publicada. Se o link não tiver sido fornecido, registre a pendência antes da publicação.
+Comentários de referência, quando fornecidos, são preservados separadamente e associados ao post. Não invente links nem considere que “link nos comentários” significa que a referência já foi publicada. Se o link não tiver sido fornecido, registre a pendência antes da publicação.
 
-Essas tarefas fazem parte do atendimento pelo agente descrito em [AGENTS.md](AGENTS.md). A CLI gera mídia local e o arquivo de crédito; ela não importa JSON, prepara legendas ou publica automaticamente.
+Essas tarefas fazem parte do atendimento pelo agente descrito em [AGENTS.md](AGENTS.md). A CLI gera mídia local e o arquivo de crédito; ela não prepara legendas nem publica automaticamente.
 
 ## Verificação
 
@@ -162,7 +178,11 @@ Os testes automatizados usam um executável falso na fronteira com o Codex para 
 
 ### Cores e luminosidade
 
-As fotos mantêm suas cores, com leve ajuste de luminosidade. Os fundos e painéis alternam carvão, azul-marinho e verde-escuro, com texto claro e cores estáveis ao renderizar o mesmo roteiro novamente. As capas usam Anton em caixa alta, uma aproximação da fonte condensada da referência StartSe (a fonte original não foi confirmada). Os slides internos usam Inter, com frase principal em negrito e explicação menor em peso regular, separadas por espaço generoso. O reel compartilha as cores sóbrias e mantém sua tipografia de cenas.
+As referências são os carrosséis [Pencils down](https://www.instagram.com/p/Dd1CIcgFSVF/?img_index=1) e [Relações humanas](https://www.instagram.com/p/Dd3rl8AFZgG/?img_index=1). Source Serif 4 é uma aproximação visual, não uma identificação confirmada da fonte original.
+
+Capas e páginas internas usam Source Serif 4: título em negrito (700), explicação regular (400), capitalização natural e alinhamento à esquerda. Inter fica reservada às informações secundárias. Em 1080 × 1350, os títulos de capa usam 100–128 px, títulos internos 72–96 px e corpo 44–48 px, com margens laterais de 96 px. O renderizador verifica transbordamento; texto excessivo precisa de revisão editorial, sem cortes automáticos.
+
+Nas páginas sem foto, alterne de forma planejada fundos sóbrios: marfim `#F3EFE5`, azul-escuro `#172A3A`, grafite `#25282B` e verde-petróleo `#203B3B`. Use texto `#191814` no claro e `#F3EFE5` no escuro, com detalhes terracota ou areia. As imagens 2 e 4 devem usar tons diferentes, sempre com contraste legível. As capas usam fotografia de página inteira em preto e branco, degradê preto e texto claro na parte inferior, sem painel opaco. Fotos internas usam uma faixa superior de 400 px; confira o espaço restante para o texto. O reel compartilha a paleta editorial, a fonte serifada e o tratamento fotográfico.
 
 ### Seleção de fotos e revisão das mídias
 
@@ -172,6 +192,16 @@ Faça três buscas com termos diferentes, compare os resultados e escolha a foto
 
 Depois das hashtags, inclua `Fonte original: <link fornecido>` quando houver e termine com `Crédito da imagem: <link da página da foto no Unsplash>`. Essa linha substitui o aviso anterior de imagem gerada por IA. Conte também o link da fonte e o crédito no limite de caracteres. Para fotos reais sem geração ou alteração por IA, não ative o rótulo de IA só porque o Codex selecionou os trechos do texto. Se outro elemento da publicação for sintético, avalie-o separadamente.
 
-## Materiais preparados
+## Privacidade e compartilhamento
 
-Consulte `out/index.html` para navegar pelo lote atual e baixar os carrosséis e as legendas. `out/lote.json` registra os IDs, datas, arquivos e pendências. Mídias, histórico e dependências ficam fora do Git.
+A etapa editorial envia o texto do post ao Codex autenticado; a renderização das mídias acontece localmente. Os arquivos `prompt.txt`, `roteiro.json` e as respostas de diagnóstico podem conter o texto integral enviado.
+
+Guarde textos e referências privados em `inputs/` e materiais gerados em `out/`. Essas pastas, `.env`, logs e dependências são ignorados pelo Git. Um destino personalizado em `--out` precisa ser ignorado separadamente. Antes de enviar alterações, confira `git status --short` e `git diff --cached`; ignorar um arquivo não remove versões já commitadas.
+
+Não compartilhe credenciais ou arquivos de sessão do Codex. Cada pessoa deve fazer seu próprio login. Para compartilhar resultados, envie apenas os materiais desejados, sem incluir prompts e diagnósticos por engano.
+
+## Licenças e distribuição
+
+Este repositório ainda não declara uma licença de uso para o código. Torná-lo público não substitui a escolha de uma licença. A base adaptada está creditada na introdução; confira suas condições e as das dependências antes de redistribuir.
+
+As músicas atualmente presentes em `music/` não têm comprovantes de licença incluídos no repositório. Confirme a autorização para redistribuí-las antes de tornar o repositório público, ou retire-as do versionamento e do histórico. Para suas próprias trilhas, use arquivos que você tenha autorização para utilizar e observe os créditos exigidos. Fotos devem ter a licença verificada na página individual do Unsplash.
